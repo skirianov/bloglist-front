@@ -3,6 +3,7 @@ import Blog from './Blog';
 import Login from './Login';
 import Logout from './Logout';
 import User from './User';
+import Notification from './Notificattion';
 import blogService from '../services/blogs';
 import BlogCreation from './BlogCreation';
 
@@ -17,7 +18,8 @@ const App = () => {
     title: '',
     author: '',
     url: '',
-  })
+  });
+  const [message, setMessage] = useState(null);
 
   useEffect(() => {
       const fetching = async () => {
@@ -39,15 +41,25 @@ const App = () => {
   const handleNewBlog = async (event) => {
     event.preventDefault();
     
-    blogService.setToken(user.token);
+    try { 
+      blogService.setToken(user.token);
 
-    const savedBlog = await blogService.create(newBlog);
-    setBlogs(blogs.concat(savedBlog));
-    setNewBlog({
-      title: '',
-      author: '',
-      url: '',
-    })
+      const savedBlog = await blogService.create(newBlog);
+      setBlogs(blogs.concat(savedBlog));
+      setMessage('OK');
+      setTimeout(() => {
+        setMessage(null);
+        setNewBlog({
+          title: '',
+          author: '',
+          url: '',
+        });
+      }, 3000);
+      
+      
+    } catch (exception) {
+      console.log(exception);
+    }
   }
 
   const blogChange = (event) => {
@@ -66,12 +78,13 @@ const App = () => {
 
   return (
     <div>
+      <Notification message={message} newBlog={newBlog} />
       {user !== null ? <User name={user.name} /> : null}
       {user !== null ? <Logout setUser={setUser} /> : null}
       {user !== null ? <BlogCreation handleNewBlog={handleNewBlog} blogChange={blogChange} newBlog={newBlog} /> : null}
       <h2>blogs</h2>
       {user === null
-        ? <Login setUser={setUser} username={username} password={password} setPassword={setPassword} setUsername={setUsername} />
+        ? <Login setUser={setUser} username={username} password={password} setPassword={setPassword} setUsername={setUsername} setMessage={setMessage} />
         :
           blogs.map((blog) =>
             <Blog key={blog.id} blog={blog} />,

@@ -2,7 +2,7 @@
 import React from 'react';
 import loginService from '../services/login';
 
-const Login = ({ username, password, setUsername, setPassword, setUser }) => {
+const Login = ({ username, password, setUsername, setPassword, setUser, setMessage }) => {
   const handleLogin = async (event) => {
     event.preventDefault();
 
@@ -18,7 +18,10 @@ const Login = ({ username, password, setUsername, setPassword, setUser }) => {
       setUsername('');
       setPassword('');
     } catch (exception) {
-    alert(exception);
+    setMessage('BAD');
+    setTimeout(() => {
+      setMessage(null);
+    }, 4000);
   }
 };
 
