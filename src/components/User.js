@@ -1,11 +1,15 @@
-/* eslint-disable react/prop-types */
 import React from 'react';
-const User = ({name}) => (
+import PropTypes from 'prop-types';
+
+const User = ({ name }) => (
   <div>
-    User: {name}
+    User:
+    {name}
   </div>
 );
 
-
+User.propTypes = {
+  name: PropTypes.string.isRequired,
+};
 
 export default User;
