@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import Blog from './Blog';
 import Login from './Login';
 import Logout from './Logout';
@@ -9,16 +9,9 @@ import BlogCreation from './BlogCreation';
 
 const App = () => {
   const [blogs, setBlogs] = useState([]);
-  // eslint-disable-next-line no-unused-vars
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  // eslint-disable-next-line no-unused-vars
-  const [newBlog, setNewBlog] = useState({
-    title: '',
-    author: '',
-    url: '',
-  });
   const [message, setMessage] = useState(null);
 
   useEffect(() => {
@@ -38,56 +31,51 @@ const App = () => {
     }
   }, []);
 
-  const handleNewBlog = async (event) => {
-    event.preventDefault();
-    
+  const addBlog = async (newBlog) => {
     try { 
       blogService.setToken(user.token);
-
       const savedBlog = await blogService.create(newBlog);
       setBlogs(blogs.concat(savedBlog));
       setMessage('OK');
       setTimeout(() => {
         setMessage(null);
-        setNewBlog({
-          title: '',
-          author: '',
-          url: '',
-        });
-      }, 3000);
-      
-      
+      },3000);
     } catch (exception) {
       console.log(exception);
     }
+  };
+
+  const updateBlog = async (id, newBlog) => {
+    const updatedBlog = await blogService.update(id, newBlog);
+    setBlogs(blogs.map((blog) => blog.id !== id ? blog : updatedBlog));
   }
 
-  const blogChange = (event) => {
-    switch (event.target.name) {
-      case "title":
-        setNewBlog({...newBlog, title: event.target.value});
-        break;
-      case "author":
-        setNewBlog({...newBlog, author: event.target.value});
-        break;
-      case "url":
-        setNewBlog({...newBlog, url: event.target.value});
-        break;  
-    }
+  const deleteBlog = async (id) => {
+    const blogToDelete = blogs.find((blog) => blog.id === id);
+    if (user.username === blogToDelete.user.username){
+      blogService.setToken(user.token);
+      await blogService.deleteOne(id); 
+      const array = [...blogs];
+      const index = array.findIndex((blog) => blog.id === id);
+      array.splice(index, 1);
+      setBlogs(array);
+    } else  {
+      alert('blogs can be deleted only by user who created it');
+    }  
   }
 
   return (
     <div>
-      <Notification message={message} newBlog={newBlog} />
+      <Notification message={message} />
       {user !== null ? <User name={user.name} /> : null}
       {user !== null ? <Logout setUser={setUser} /> : null}
-      {user !== null ? <BlogCreation handleNewBlog={handleNewBlog} blogChange={blogChange} newBlog={newBlog} /> : null}
+      {user !== null ? <BlogCreation createBlog={addBlog} /> : null}
       <h2>blogs</h2>
       {user === null
         ? <Login setUser={setUser} username={username} password={password} setPassword={setPassword} setUsername={setUsername} setMessage={setMessage} />
         :
           blogs.map((blog) =>
-            <Blog key={blog.id} blog={blog} />,
+            <Blog key={blog.id} blog={blog} updateBlog={updateBlog} deleteBlog={deleteBlog} />,
           )
         
       }

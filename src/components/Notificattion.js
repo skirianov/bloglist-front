@@ -12,14 +12,14 @@ const warning = {
   border: '3px solid red',  
 }
 
-const Notification = ({ message, newBlog }) => {
+const Notification = ({ message }) => {
   let style = null;
 
   let notification = '';
 
   if (message === 'OK'){
     style = success;
-    notification = `a new blog "${newBlog["title"]}" has been posted`;
+    notification = `a new blog has been posted`;
   } else if (message === 'BAD') {
     style = warning;
     notification = 'wrong username or password';
