@@ -2,29 +2,34 @@
 /* eslint-disable no-alert */
 /* eslint-disable no-console */
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Blog from './Blog';
 import Login from './Login';
 import Logout from './Logout';
 import User from './User';
 import Notification from './Notificattion';
+import notificationAction from '../actionCreators/notificationAction';
 import blogService from '../services/blogs';
 import BlogCreation from './BlogCreation';
+import {
+  blogsGetAll,
+  blogsAddNew,
+  deleteOneBlog,
+  updateOneBlog,
+} from '../actionCreators/blogsAction';
 
 const App = () => {
-  const [blogs, setBlogs] = useState([]);
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState(null);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    const fetching = async () => {
-      const fetchedBlogs = await blogService.getAll();
-      setBlogs(fetchedBlogs);
-    };
-
-    fetching();
+    dispatch(blogsGetAll());
   }, []);
+
+  const blogs = useSelector((state) => state.blogs);
 
   useEffect(() => {
     const loggedInUser = window.localStorage.getItem('loggedInUser');
@@ -37,31 +42,22 @@ const App = () => {
   const addBlog = async (newBlog) => {
     try {
       blogService.setToken(user.token);
-      const savedBlog = await blogService.create(newBlog);
-      setBlogs(blogs.concat(savedBlog));
-      setMessage('OK');
-      setTimeout(() => {
-        setMessage(null);
-      }, 3000);
+      dispatch(blogsAddNew(newBlog));
+      dispatch(notificationAction('OK'));
     } catch (exception) {
       console.log(exception);
     }
   };
 
   const updateBlog = async (id, newBlog) => {
-    const updatedBlog = await blogService.update(id, newBlog);
-    setBlogs(blogs.map((blog) => (blog.id !== id ? blog : updatedBlog)));
+    dispatch(updateOneBlog(id, newBlog));
   };
 
   const deleteBlog = async (id) => {
     const blogToDelete = blogs.find((blog) => blog.id === id);
     if (user.username === blogToDelete.user.username) {
       blogService.setToken(user.token);
-      await blogService.deleteOne(id);
-      const array = [...blogs];
-      const index = array.findIndex((blog) => blog.id === id);
-      array.splice(index, 1);
-      setBlogs(array);
+      dispatch(deleteOneBlog(id));
     } else {
       alert('blogs can be deleted only by user who created it');
     }
@@ -69,7 +65,7 @@ const App = () => {
 
   return (
     <div>
-      <Notification message={message} />
+      <Notification />
       {user !== null ? <User name={user.name} /> : null}
       {user !== null ? <Logout setUser={setUser} /> : null}
       {user !== null ? <BlogCreation createBlog={addBlog} /> : null}
@@ -82,7 +78,7 @@ const App = () => {
             password={password}
             setPassword={setPassword}
             setUsername={setUsername}
-            setMessage={setMessage}
+            setMessage={() => console.log('aha')}
           />
         )
         : blogs.map((blog) => (

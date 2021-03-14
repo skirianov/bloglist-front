@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
 
 const success = {
   color: 'green',
@@ -13,11 +13,11 @@ const warning = {
   border: '3px solid red',
 };
 
-const Notification = ({ message }) => {
+const Notification = () => {
   let style = null;
-
   let notification = '';
 
+  const message = useSelector((state) => state);
   if (message === 'OK') {
     style = success;
     notification = 'a new blog has been posted';
@@ -45,9 +45,6 @@ const Notification = ({ message }) => {
   );
 };
 
-Notification.propTypes = {
-  message: PropTypes.string,
-};
 Notification.defaultProps = {
   message: null,
 };
