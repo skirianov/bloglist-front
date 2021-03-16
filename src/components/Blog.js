@@ -1,5 +1,9 @@
+/* eslint-disable no-alert */
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
+import { updateOneBlog, deleteOneBlog } from '../actionCreators/blogsAction';
+import blogService from '../services/blogs';
 
 const style = {
   border: '1px solid black',
@@ -7,8 +11,14 @@ const style = {
   padding: '6px',
 };
 
-const Blog = ({ blog, updateBlog, deleteBlog }) => {
+const Blog = ({ blog }) => {
+  const dispatch = useDispatch();
+  const user = JSON.parse(window.localStorage.getItem('loggedInUser'));
   const [visible, setVisibility] = useState(false);
+
+  const updateBlog = async (id, newBlog) => {
+    dispatch(updateOneBlog(id, newBlog));
+  };
 
   const increaseLikes = async () => {
     // eslint-disable-next-line no-param-reassign
@@ -16,10 +26,14 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
     await updateBlog(blog.id, blog);
   };
 
-  const deleteIt = async () => {
-    // eslint-disable-next-line no-alert
-    if (window.confirm(`do you want to delete "${blog.title}" by ${blog.author}?`)) {
-      await deleteBlog(blog.id);
+  const deleteBlog = () => {
+    if (user.username === blog.user.username) {
+      blogService.setToken(user.token);
+      if (window.confirm(`do you want to delete "${blog.title}" by ${blog.author}?`)) {
+        dispatch(deleteOneBlog(blog.id));
+      }
+    } else {
+      alert('blogs can be deleted only by user who created it');
     }
   };
 
@@ -49,7 +63,7 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
         </p>
         <button type="button" onClick={() => setVisibility(!visible)}>view</button>
         <button type="button" onClick={increaseLikes}>like</button>
-        <button type="button" onClick={deleteIt}>delete</button>
+        <button type="button" onClick={deleteBlog}>delete</button>
       </div>
     );
   }
@@ -70,7 +84,5 @@ const Blog = ({ blog, updateBlog, deleteBlog }) => {
 Blog.propTypes = {
   // eslint-disable-next-line react/forbid-prop-types
   blog: PropTypes.object.isRequired,
-  updateBlog: PropTypes.func.isRequired,
-  deleteBlog: PropTypes.func.isRequired,
 };
 export default Blog;

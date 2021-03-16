@@ -1,11 +1,15 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React from 'react';
+import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import loginService from '../services/login';
+import loginAction from '../actionCreators/loginAction';
 
 const Login = ({
-  username, password, setUsername, setPassword, setUser, setMessage,
+  username, password, setUsername, setPassword, setMessage,
 }) => {
+  const dispatch = useDispatch();
+
   const handleLogin = async (event) => {
     event.preventDefault();
 
@@ -16,7 +20,7 @@ const Login = ({
       });
 
       window.localStorage.setItem('loggedInUser', JSON.stringify(user));
-      setUser(user);
+      dispatch(loginAction(user));
       setUsername('');
       setPassword('');
     } catch (exception) {
@@ -47,7 +51,6 @@ Login.propTypes = {
   password: PropTypes.string.isRequired,
   setUsername: PropTypes.func.isRequired,
   setPassword: PropTypes.func.isRequired,
-  setUser: PropTypes.func.isRequired,
   setMessage: PropTypes.func.isRequired,
 };
 

@@ -1,11 +1,13 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { useDispatch } from 'react-redux';
+import logoutAction from '../actionCreators/logoutAction';
 
-const Logout = ({ setUser }) => {
+const Logout = () => {
+  const dispatch = useDispatch();
   const handleLogout = () => {
     window.localStorage.removeItem('loggedInUser');
     window.localStorage.clear();
-    setUser(null);
+    dispatch(logoutAction());
   };
 
   return (
@@ -13,10 +15,6 @@ const Logout = ({ setUser }) => {
       <button type="button" onClick={handleLogout}>Logout</button>
     </div>
   );
-};
-
-Logout.propTypes = {
-  setUser: PropTypes.func.isRequired,
 };
 
 export default Logout;

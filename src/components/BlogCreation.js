@@ -1,8 +1,13 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
+import blogService from '../services/blogs';
+import { blogsAddNew } from '../actionCreators/blogsAction';
+import notificationAction from '../actionCreators/notificationAction';
 
-const BlogCreation = ({ createBlog }) => {
+const BlogCreation = () => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
   const [visible, setVisibility] = useState(false);
   const [newBlog, setNewBlog] = useState({
     title: '',
@@ -28,13 +33,20 @@ const BlogCreation = ({ createBlog }) => {
 
   const addBlog = (event) => {
     event.preventDefault();
-    createBlog(newBlog);
-    setNewBlog({
-      title: '',
-      author: '',
-      url: '',
-    });
     setVisibility(false);
+    try {
+      blogService.setToken(user.token);
+      dispatch(blogsAddNew(newBlog));
+      setNewBlog({
+        title: '',
+        author: '',
+        url: '',
+      });
+      dispatch(notificationAction('OK'));
+    } catch (exception) {
+      // eslint-disable-next-line no-console
+      console.log(exception);
+    }
   };
 
   if (visible) {
@@ -63,10 +75,6 @@ const BlogCreation = ({ createBlog }) => {
       <button type="button" onClick={() => setVisibility(!visible)}>new blog-post</button>
     </div>
   );
-};
-
-BlogCreation.propTypes = {
-  createBlog: PropTypes.func.isRequired,
 };
 
 export default BlogCreation;
